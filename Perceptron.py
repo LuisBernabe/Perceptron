@@ -8,10 +8,10 @@ class perceptron:
         """
                 NumEntradas: para genererar los pesos aleatorios
         """
-        self.weights=list(random.uniform(-0.5,0.5) for i in range(NumEntradas))
+        self.weights=list(random.uniform(-0.5,0.5) for i in range(NumEntradas+1))
         self.lr=0.3 #taza de aprendizaje
         self.umbral= random.uniform(-0.5,0.5)
-        print "\nPesos aleatorios:"+ str(self.weights)
+        print ("\nPesos aleatorios:", self.weights)
 
 
 
@@ -27,8 +27,9 @@ class perceptron:
         return      el valor de la funcion de activacion
         """
         sum=0.00
-        for i in range(len(self.weights)):
-            sum+=self.weights[i]*inputs[i]-self.umbral
+        for i in range(len(self.weights)-1):
+            sum+=self.weights[i]*inputs[i]#-self.umbral
+        sum+=self.weights[i+1]
         output= self.escalon(sum)
         return output
 
@@ -43,24 +44,10 @@ class perceptron:
         aprox=self.guess(inputs) #obtengo el valor de la funcion de activacion
         error=target-aprox #obtengo el error
 
-        if(inputs[0] == 0 and target== 0 and error == 1):
-             self.umbral = self.weights[0] + self.umbral
-        elif (inputs[0] == 0 and target == 0 and error == -1):
-            self.umbral = self.weights[0] - self.umbral
-        elif(inputs[1] == 0 and target == 0 and error == 1):
-            self.umbral = self.weights[1] + self.umbral
-        elif (inputs[1] == 0 and target == 0 and error == -1):
-            self.umbral = self.weights[1] - self.umbral
-        elif(inputs[2] == 0 and target == 0 and error == 1):
-             self.umbral = self.weights[2] + self.umbral
-        elif (inputs[2] == 0 and target == 0 and error == -1):
-            self.umbral = self.weights[2] - self.umbral
-
-
-        for i in range(len(self.weights)):
-            self.weights[i]=self.weights[i] + (error * inputs[i]) + self.lr
-
-        print "\n"
+        for i in range(len(self.weights)-1):
+            self.weights[i]=self.weights[i] + (error * inputs[i] * self.lr)
+        self.weights[i+1]=self.weights[i+1]+(error * self.lr)
+        print ("\n")
 
 
 
@@ -75,43 +62,14 @@ class perceptron:
         """
         i=0
         while i < len(conj):
-            estimado=p.guess(conj[i])
+            estimado=self.guess(conj[i])
             if (estimado != valores[i]):
-                print "\nEl valor esperado de ",conj[i]," es: ",valores[i],"y se obtuvo",estimado
-                print "******CORRIGE PESOS***********\npesos anteriores:",self.weights
+                print ("\nEl valor esperado de ",conj[i]," es: ",valores[i],"y se obtuvo",estimado)
+                print ("******CORRIGE PESOS***********\npesos anteriores:",self.weights)
                 self.corrige(conj[i],valores[i])
-                print "Pesos actuales",self.weights,"\n******************************\n"
+                print ("Pesos actuales",self.weights,"\n******************************\n")
                 i= - 1
             else:
-                print "Se obtuvo el valor deseado de la entrada",conj[i],"con salida",valores[i]
+                print ("Se obtuvo el valor deseado de la entrada",conj[i],"con salida",valores[i])
 
             i=i+1
-
-
-
-
-p= perceptron(3)
-testPrueba=[[0,0,0],[0,0,1],[1,0,1],[1,1,1]]
-test=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
-valAnd=[0,0,0,0,0,0,0,1]
-valOr=[0,1,1,1,1,1,1,1]
-
-opcion=raw_input("Que compuerta desea probar, And u Or? [A|O]\n")
-
-if opcion == 'A':
-    p.entrenamiento(test,valAnd)
-elif opcion=='O':
-    p.entrenamiento(test,valOr)
-print "Entrenamiento realizado"
-
-print "\n******************TESTING*******************"
-res=0
-tst=[]
-for i in range(len(test)):
-    res=p.guess(test[i])
-    tst=test[i]
-    print "Entrada ",test[i]," Salida: "+str(res)
-
-entradas=input("Ingresa los tres valores correspondientes en el siguiente orden: [x1,x2,x3] (los valores son 0 o 1)\n")
-print "\n******************PRUEBA INTERACTIVA*******************"
-print "para la entrada ", list(entradas)," el resultado es: ",p.guess(list(entradas))
